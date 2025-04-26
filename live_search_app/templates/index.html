@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Search</title>
+</head>
+<body>
+<h2>Live Company Search</h2>
+<input type="text" id="searchInput" placeholder="Type at least 3 characters..."/>
+<ul id="results"></ul>
+
+<script>
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/search/');
+    const input = document.getElementById("searchInput");
+    const results = document.getElementById("results");
+
+    input.addEventListener("input", function () {
+        const query = input.value;
+        if (query.length >= 3) {
+            socket.send(JSON.stringify({query}));
+        } else {
+            results.innerHTML = "";
+        }
+    });
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        results.innerHTML = "";
+        data.results.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = `${item.name} (${item.country}) - CEO: ${item.ceo}`;
+            results.appendChild(li);
+        });
+    };
+</script>
+</body>
+</html>
